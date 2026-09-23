@@ -101,12 +101,46 @@ main { max-width: 780px; margin: 0 auto; padding: 28px 16px 56px; }
 .instances dt { font-weight: 700; margin-top: 12px; }
 .instances dd { margin: 4px 0 0; color: var(--ink-soft); }
 
-.norms { display: grid; gap: 8px; }
-.norm { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; font-size: 14.5px; }
-.norm b { color: var(--accent); }
+.norms { display: grid; gap: 14px; }
+.norm-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+.norm-card h3 { margin: 0 0 10px; color: var(--accent); font-size: 1.02rem; }
+.norm-card dt { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .02em; color: var(--ink-soft); margin-top: 10px; }
+.norm-card dd { margin: 3px 0 0; }
 
 .q-list { padding-left: 20px; }
 .q-list li { margin-bottom: 8px; }
+
+.fact-list { padding-left: 20px; }
+.fact-list li { margin-bottom: 6px; }
+
+.party-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .party-grid { grid-template-columns: 1fr; } }
+.party-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+.party-card h3 { margin: 0 0 6px; }
+.party-card dt { font-weight: 700; font-size: 13px; color: var(--ink-soft); margin-top: 10px; }
+.party-card dd { margin: 3px 0 0; }
+.party-card dd.unknown { font-style: italic; color: var(--ink-soft); }
+
+.lawyer-exercise { display: grid; gap: 14px; }
+.le-q { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+.le-q textarea {
+  font: inherit; font-weight: 400; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); resize: vertical;
+}
+
+.reveal-gate { text-align: center; margin: 36px 0; padding: 22px; border: 1px dashed var(--line); border-radius: var(--radius); }
+.reveal-gate .page-note { margin-top: 10px; }
+
+.whatif-list { display: grid; gap: 8px; }
+.whatif { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; }
+.whatif summary { cursor: pointer; font-weight: 600; }
+.whatif p { margin: 10px 0 2px; color: var(--ink-soft); }
+
+.lessons { padding-left: 20px; }
+.lessons li { margin-bottom: 8px; }
+
+.reading-list { padding-left: 20px; }
+.source-tier-label { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-soft); margin: 18px 0 4px; }
 
 .source-list { list-style: none; padding: 0; margin: 0; }
 .source-list li { padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; }

@@ -10,6 +10,7 @@ rmSync(DIST, { recursive: true, force: true });
 mkdirSync(DIST, { recursive: true });
 mkdirSync(join(DIST, "assets"), { recursive: true });
 cpSync(join(ROOT, "assets", "styles.css"), join(DIST, "assets", "styles.css"));
+cpSync(join(ROOT, "assets", "case.js"), join(DIST, "assets", "case.js"));
 if (existsSync(join(ROOT, "public"))) {
   cpSync(join(ROOT, "public"), DIST, { recursive: true });
 }
@@ -22,7 +23,7 @@ const NAV = [
   { href: "/o-proekte/", label: "О проекте" },
 ];
 
-function layout({ title, description, body }) {
+function layout({ title, description, body, script }) {
   return `<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -44,6 +45,7 @@ function layout({ title, description, body }) {
   <p>Рабочее название проекта, макет в разработке. Материалы сайта — учебные, не являются юридической консультацией.</p>
   <p><a href="/o-proekte/">О проекте и источниках →</a></p>
 </footer>
+${script ? `<script src="${script}" defer></script>` : ""}
 </body>
 </html>`;
 }
@@ -122,68 +124,148 @@ for (const c of published) {
   write(`dela/${c.slug}`, layout({
     title: c.title,
     description: c.sixtySeconds.slice(0, 160),
+    script: "/assets/case.js",
     body: `
       <div class="case-header">
         <div class="case-meta">${statusChip(c.status)}<span class="chip">${esc(c.category)}</span><span class="chip">${esc(c.difficulty)}</span></div>
         <h1>${esc(c.title)}</h1>
         <p class="case-sub">${esc(c.court)} · ${esc(c.caseNumber)} · ${esc(c.date)} · ${esc(c.region)}</p>
-        <p class="case-sub"><b>Истец:</b> ${esc(c.parties.plaintiff)}<br><b>Ответчик:</b> ${esc(c.parties.defendant)}</p>
-        <p class="case-sub"><b>Требование:</b> ${esc(c.claim)}</p>
       </div>
 
       <div class="block">
-        <h2>Коротко за 60 секунд</h2>
+        <h2>⚡ Дело за 60 секунд</h2>
         <div class="sixty">${esc(c.sixtySeconds)}</div>
       </div>
 
       <div class="block">
-        <h2>Хронология</h2>
-        <ul class="timeline">
-          ${c.timeline.map((t) => `<li><span class="t-date">${esc(t.date)}</span>${esc(t.label)}</li>`).join("")}
-        </ul>
+        <h2>⚖️ Юридическая проблема</h2>
+        <ul class="q-list">${c.legalProblem.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
       </div>
 
       <div class="block">
-        <h2>Что решили суды по инстанциям</h2>
-        <dl class="instances">
-          <dt>Первая инстанция</dt><dd>${esc(c.instances.firstInstance)}</dd>
-          <dt>Апелляция</dt><dd>${esc(c.instances.appeal)}</dd>
-          <dt>Кассация</dt><dd>${esc(c.instances.cassation)}</dd>
-          <dt>Верховный Суд РФ</dt><dd>${esc(c.instances.supremeCourt)}</dd>
-        </dl>
+        <h2>📋 Факты (известны до решения суда)</h2>
+        <ul class="fact-list">${c.factsKnown.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>
       </div>
 
       <div class="block">
-        <h2>Доказательства</h2>
-        <p><b>Представлены истцом:</b> ${esc(c.evidence.plaintiff)}</p>
-        <p><b>Оценка судов:</b> ${esc(c.evidence.acceptedByCourt)}</p>
-      </div>
-
-      <div class="block">
-        <h2>Чем закончилось</h2>
-        <p>${esc(c.outcome)}</p>
-      </div>
-
-      <div class="block">
-        <h2>Применённые нормы права</h2>
-        <div class="norms">
-          ${c.appliedNorms.map((n) => `<div class="norm"><b>${esc(n.code)} ${esc(n.article)}</b> — ${esc(n.note)}</div>`).join("")}
+        <h2>👥 Стороны</h2>
+        <div class="party-grid">
+          <div class="party-card">
+            <h3>Истец</h3>
+            <p>${esc(c.partiesDetailed.plaintiff.who)}</p>
+            <dl>
+              <dt>Требование</dt><dd>${esc(c.partiesDetailed.plaintiff.claim)}</dd>
+              <dt>Главный аргумент</dt><dd>${esc(c.partiesDetailed.plaintiff.mainArgument)}</dd>
+              <dt>Главное доказательство</dt><dd>${esc(c.partiesDetailed.plaintiff.mainEvidence)}</dd>
+            </dl>
+          </div>
+          <div class="party-card">
+            <h3>Ответчик</h3>
+            <p>${esc(c.partiesDetailed.defendant.who)}</p>
+            <dl>
+              <dt>Позиция</dt><dd class="unknown">${esc(c.partiesDetailed.defendant.claim)}</dd>
+              <dt>Главный аргумент</dt><dd class="unknown">${esc(c.partiesDetailed.defendant.mainArgument)}</dd>
+              <dt>Главное доказательство</dt><dd class="unknown">${esc(c.partiesDetailed.defendant.mainEvidence)}</dd>
+            </dl>
+          </div>
         </div>
       </div>
 
       <div class="block">
-        <h2>Разбор адвоката</h2>
-        <p><b>Главные вопросы дела:</b></p>
-        <ul class="q-list">${c.advocateAnalysis.centralQuestions.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
-        <p><b>Урок для начинающего юриста:</b> ${esc(c.advocateAnalysis.lesson)}</p>
-        <p class="page-note">${esc(c.advocateAnalysis.framing)}</p>
+        <h2>🧑‍⚖️ Ты — адвокат</h2>
+        <p>${esc(c.lawyerExercise.intro)}</p>
+        <form class="lawyer-exercise" data-case="${esc(c.slug)}">
+          ${c.lawyerExercise.questions.map((q, i) => `
+            <label class="le-q">
+              <span>${i + 1}. ${esc(q)}</span>
+              <textarea data-q="${i}" rows="2" placeholder="Твой ответ (сохраняется только в этом браузере)"></textarea>
+            </label>
+          `).join("")}
+        </form>
       </div>
 
-      <div class="block">
-        <h2>Источники</h2>
-        <ul class="source-list">
-          ${c.sources.map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.label)}</a><br><span class="source-type">проверено: ${esc(s.checkedAt)}</span></li>`).join("")}
-        </ul>
+      <div class="reveal-gate">
+        <button type="button" class="btn btn-primary" data-reveal-btn>🔓 Показать решение суда</button>
+        <p class="page-note">Сначала попробуй ответить на вопросы выше — потом сравни со сложившейся практикой.</p>
+      </div>
+
+      <div class="reveal-zone" data-reveal-zone hidden>
+
+        <div class="block">
+          <h2>🏛 Что решили суды по инстанциям</h2>
+          <dl class="instances">
+            <dt>Первая инстанция</dt><dd>${esc(c.instances.firstInstance)}</dd>
+            <dt>Апелляция</dt><dd>${esc(c.instances.appeal)}</dd>
+            <dt>Кассация</dt><dd>${esc(c.instances.cassation)}</dd>
+            <dt>Верховный Суд РФ</dt><dd>${esc(c.instances.supremeCourt)}</dd>
+          </dl>
+        </div>
+
+        <div class="block">
+          <h2>🔬 Доказательства</h2>
+          <p><b>Представлены истцом:</b> ${esc(c.evidence.plaintiff)}</p>
+          <p><b>Приняты и оценены судом:</b> ${esc(c.evidence.acceptedByCourt)}</p>
+          <p><b>Не оценивались:</b> ${esc(c.evidence.notEvaluated)}</p>
+        </div>
+
+        <div class="block">
+          <h2>💡 Почему</h2>
+          <p>${esc(c.rationale)}</p>
+        </div>
+
+        <div class="block">
+          <h2>Чем закончилось</h2>
+          <p>${esc(c.outcome)}</p>
+        </div>
+
+        <div class="block">
+          <h2>📚 Закон — разбор по каждой норме</h2>
+          <div class="norms">
+            ${c.appliedNorms.map((n) => `
+              <div class="norm-card">
+                <h3>${esc(n.code)} ${esc(n.article)}</h3>
+                <dl>
+                  <dt>Что регулирует</dt><dd>${esc(n.what)}</dd>
+                  <dt>Почему появилась в этом деле</dt><dd>${esc(n.whyInCase)}</dd>
+                  <dt>Как её поняла апелляция</dt><dd>${esc(n.howAppealRead)}</dd>
+                  <dt>Как применил Верховный Суд</dt><dd>${esc(n.howSupremeCourt)}</dd>
+                  <dt>Практический урок</dt><dd>${esc(n.lesson)}</dd>
+                </dl>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="block">
+          <h2>⚔️ А если бы...</h2>
+          <p class="page-note">Гипотетические сценарии — учебное рассуждение по тем же нормам права, не установленные факты этого дела.</p>
+          <div class="whatif-list">
+            ${c.whatIf.map((w) => `<details class="whatif"><summary>${esc(w.q)}</summary><p>${esc(w.a)}</p></details>`).join("")}
+          </div>
+        </div>
+
+        <div class="block">
+          <h2>🎓 Чему учит дело</h2>
+          <ol class="lessons">${c.lessons.map((l) => `<li>${esc(l)}</li>`).join("")}</ol>
+        </div>
+
+        <div class="block">
+          <h2>📖 Что почитать дальше</h2>
+          <ul class="reading-list">${c.furtherReading.map((r) => `<li><a href="${r.href}">${esc(r.label)}</a></li>`).join("")}</ul>
+        </div>
+
+        <div class="block">
+          <h2>🔗 Первоисточники</h2>
+          <p class="source-tier-label">Первоисточник</p>
+          <p class="page-note">${esc(c.sourcesTiered.primary)}</p>
+          <p class="source-tier-label">Вторичные источники</p>
+          <ul class="source-list">
+            ${c.sourcesTiered.secondary.map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.label)}</a><br><span class="source-type">проверено: ${esc(s.checkedAt)}</span></li>`).join("")}
+          </ul>
+          <p class="source-tier-label">Анализ «Кодекса права»</p>
+          <p class="page-note">${esc(c.sourcesTiered.ownAnalysisNote)}</p>
+        </div>
+
       </div>
     `,
   }));
