@@ -84,6 +84,29 @@ main { max-width: 780px; margin: 0 auto; padding: 28px 16px 56px; }
 .chip-status-discovered { background: var(--surface-2); color: var(--ink-soft); }
 .case-card h3 { margin: 0 0 6px; font-size: 1.05rem; }
 .case-card .case-cat { color: var(--ink-soft); font-size: 13.5px; }
+.case-card .case-learn { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+.case-card .case-go { display: inline-block; margin-top: 10px; font-weight: 700; font-size: 14px; color: var(--accent); }
+.chip-num { background: transparent; border: 1px solid var(--line); }
+.chip-topic { font-size: 13.5px; padding: 6px 12px; }
+
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 720px) { .steps-grid { grid-template-columns: 1fr; } }
+.step-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.step-n { display: block; font-size: 1.6rem; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+.step-card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.step-card p { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
+
+.learn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 640px) { .learn-grid { grid-template-columns: 1fr; } }
+.learn-card { background: var(--surface-2); border-radius: 12px; padding: 14px 16px; }
+.learn-card h3 { margin: 0 0 4px; font-size: 0.98rem; }
+.learn-card p { margin: 0; color: var(--ink-soft); font-size: 13.5px; }
+
+.cta-band { margin: 44px 0; padding: 26px; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.cta-band h2 { margin: 0 0 10px; }
+.cta-band p { color: var(--ink-soft); max-width: 55ch; margin: 0 auto 18px; }
+
+.topic-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .case-header { margin-bottom: 20px; }
 .case-header h1 { font-size: 1.6rem; margin: 6px 0 10px; }

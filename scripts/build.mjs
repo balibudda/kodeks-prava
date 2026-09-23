@@ -42,8 +42,8 @@ function layout({ title, description, body, script }) {
 </header>
 <main>${body}</main>
 <footer class="site-foot">
-  <p>Рабочее название проекта, макет в разработке. Материалы сайта — учебные, не являются юридической консультацией.</p>
-  <p><a href="/o-proekte/">О проекте и источниках →</a></p>
+  <p><b>Кодекс права</b> — учебный проект по российской судебной практике (рабочее название). Дела сопровождаются ссылками на доступные первоисточники. Материалы предназначены для обучения и не являются юридической консультацией.</p>
+  <p><a href="/o-proekte/">О проекте, источниках и статусе наполнения →</a></p>
 </footer>
 ${script ? `<script src="${script}" defer></script>` : ""}
 </body>
@@ -64,48 +64,84 @@ function statusChip(status) {
   return `<span class="chip chip-status-${status}">${STATUS_LABELS[status]}</span>`;
 }
 
-function caseCard(c) {
+function caseCard(c, index) {
+  const number = String(index + 1).padStart(2, "0");
   if (c.status !== "published") {
     return `<div class="case-card is-stub">
-      <div class="case-meta">${statusChip(c.status)}<span class="chip">${esc(c.category)}</span></div>
+      <div class="case-meta"><span class="chip chip-num">Дело №${number}</span>${statusChip(c.status)}<span class="chip">${esc(c.category)}</span></div>
       <h3>${esc(c.title)}</h3>
       <p class="case-cat">Скоро — идёт отбор и проверка источников.</p>
     </div>`;
   }
   return `<a class="case-card" href="/dela/${c.slug}/">
-    <div class="case-meta">${statusChip(c.status)}<span class="chip">${esc(c.category)}</span><span class="chip">${esc(c.difficulty)}</span></div>
+    <div class="case-meta"><span class="chip chip-num">Дело №${number}</span>${statusChip(c.status)}<span class="chip">${esc(c.category)}</span><span class="chip">${esc(c.difficulty)}</span></div>
     <h3>${esc(c.title)}</h3>
     <p class="case-cat">${esc(c.court)} · ${esc(c.date)}</p>
+    ${c.learningPoints ? `<p class="case-learn"><b>Что изучишь:</b> ${c.learningPoints.map(esc).join(" · ")}</p>` : ""}
+    <span class="case-go">Изучить дело →</span>
   </a>`;
 }
 
 // ---------- главная ----------
 const published = CASES.filter((c) => c.status === "published");
-const total = CASES.length;
+const firstCase = published[0];
+const categories = [...new Set(CASES.map((c) => c.category))];
+
+const HOW_IT_WORKS = [
+  { n: "01", title: "Изучи дело", text: "Факты, стороны, доказательства, документы — до того, как известно решение суда." },
+  { n: "02", title: "Реши сам", text: "Определи, кто и что должен доказать. Найди применимые нормы. Сформируй позицию." },
+  { n: "03", title: "Сравни с судом", text: "Посмотри решение и аргументацию суда — и разберись, почему итог оказался именно таким." },
+];
+
+const WHAT_YOU_LEARN = [
+  { title: "Читать судебное дело", text: "Отделять факты от юридически значимых обстоятельств." },
+  { title: "Находить норму права", text: "Понимать, какая статья относится к конкретной ситуации." },
+  { title: "Работать с доказательствами", text: "Видеть, что сторона должна доказать и чем это подтверждается." },
+  { title: "Строить позицию", text: "Формулировать аргументы истца или ответчика." },
+  { title: "Понимать суд", text: "Читать решение и видеть, почему суд пришёл к определённому выводу." },
+  { title: "Анализировать апелляцию и кассацию", text: "Понимать, что именно оспаривается на каждой стадии." },
+];
 
 write("", layout({
-  title: "Изучай право на реальных делах",
-  description: "Реальные российские гражданские дела, разобранные понятным языком: факты, доказательства, закон, решение суда — с проверяемыми источниками.",
+  title: "Научись думать как юрист — на реальных судебных делах",
+  description: "100 реальных судебных дел: факты, доказательства, закон, решение суда. Сначала реши сам — потом сравни свою позицию с тем, что решил настоящий суд.",
   body: `
     <section class="hero">
-      <h1>Изучай право на реальных делах</h1>
-      <p class="lead">Разбор настоящих гражданских дел: кто с кем судился, чего требовали, что решил суд первой инстанции, апелляция, кассация — и почему. Со ссылкой на первоисточник у каждого дела.</p>
+      <h1>Научись думать как юрист — на реальных судебных делах</h1>
+      <p class="lead">100 реальных дел. Факты, доказательства, законы и решения судов. Сначала попробуй решить дело сам. Потом сравни свою позицию с тем, что решил настоящий суд.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="/dela/">Смотреть дела →</a>
-        <a class="btn btn-ghost" href="/o-proekte/">Как устроен проект</a>
+        ${firstCase ? `<a class="btn btn-primary" href="/dela/${firstCase.slug}/">Начать обучение →</a>` : ""}
+        <a class="btn btn-ghost" href="/dela/">Выбрать дело</a>
       </div>
     </section>
 
     <div class="stats">
-      <div class="stat"><b>${published.length}</b><span>дело опубликовано</span></div>
-      <div class="stat"><b>${total}</b><span>тем отобрано сейчас</span></div>
-      <div class="stat"><b>100</b><span>дел — плановый объём курса</span></div>
+      <div class="stat"><b>100</b><span>дел — цель учебного курса</span></div>
+      <div class="stat"><b>${categories.length}</b><span>правовых тем — от наследства до корпоративных споров</span></div>
+      <div class="stat"><b>100%</b><span>дел — с проверяемым первоисточником</span></div>
+    </div>
+
+    <div class="section-h"><h2>Как это работает</h2></div>
+    <div class="steps-grid">
+      ${HOW_IT_WORKS.map((s) => `<div class="step-card"><span class="step-n">${s.n}</span><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div>`).join("")}
     </div>
 
     <div class="section-h"><h2>100 дел — 100 уроков</h2><a href="/dela/">все дела →</a></div>
     <div class="case-grid">${CASES.map(caseCard).join("")}</div>
 
-    <div class="status-note">Это ранний рабочий макет: наполнение реальными проверенными делами идёт постепенно, маленькими партиями, каждая — со сверкой по первоисточнику.</div>
+    <div class="section-h"><h2>Что ты научишься делать</h2></div>
+    <div class="learn-grid">
+      ${WHAT_YOU_LEARN.map((l) => `<div class="learn-card"><h3>${esc(l.title)}</h3><p>${esc(l.text)}</p></div>`).join("")}
+    </div>
+
+    <section class="cta-band">
+      <h2>Начинаешь с нуля?</h2>
+      <p>Не нужен юридический диплом. Здесь можно начать с простых дел и постепенно перейти к сложным судебным спорам. Каждый кейс объясняется обычным языком, а затем разбирается через нормы права, доказательства и судебную практику.</p>
+      ${firstCase ? `<a class="btn btn-primary" href="/dela/${firstCase.slug}/">Начать с первого дела →</a>` : ""}
+    </section>
+
+    <div class="section-h"><h2>Темы</h2></div>
+    <div class="topic-chips">${categories.map((c) => `<span class="chip chip-topic">${esc(c)}</span>`).join("")}</div>
   `,
 }));
 
