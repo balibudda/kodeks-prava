@@ -60,6 +60,21 @@ function write(path, html) {
   writeFileSync(join(dir, "index.html"), html);
 }
 
+function resolveCompare(c, key) {
+  switch (key) {
+    case "legalProblem": return c.legalProblem.join(" ");
+    case "claim": return c.claim;
+    case "evidencePlaintiff": return c.evidence.plaintiff;
+    case "appealRisk": return c.instances.appeal;
+    case "keyNorm": {
+      const n = c.appliedNorms.find((n) => n.article.includes("1153"));
+      return n ? `${n.code} ${n.article} — ${n.what} ${n.howSupremeCourt}` : "";
+    }
+    case "allNorms": return c.appliedNorms.map((n) => `${n.code} ${n.article}`).join(", ");
+    default: return "";
+  }
+}
+
 function statusChip(status) {
   return `<span class="chip chip-status-${status}">${STATUS_LABELS[status]}</span>`;
 }
@@ -211,9 +226,9 @@ for (const c of published) {
         <h2>🧑‍⚖️ Ты — адвокат</h2>
         <p>${esc(c.lawyerExercise.intro)}</p>
         <form class="lawyer-exercise" data-case="${esc(c.slug)}">
-          ${c.lawyerExercise.questions.map((q, i) => `
+          ${c.lawyerExercise.questions.map((item, i) => `
             <label class="le-q">
-              <span>${i + 1}. ${esc(q)}</span>
+              <span>${i + 1}. ${esc(item.q)}</span>
               <textarea data-q="${i}" rows="2" placeholder="Твой ответ (сохраняется только в этом браузере)"></textarea>
             </label>
           `).join("")}
@@ -228,6 +243,23 @@ for (const c of published) {
       <div class="reveal-zone" data-reveal-zone hidden>
 
         <div class="block">
+          <h2>🧠 Сравни свою позицию с делом</h2>
+          <p class="page-note">Без оценки в баллах — мы не можем автоматически проверить юридическое рассуждение (это в планах, но пока не сделано). Просто сопоставь свой ответ с тем, что реально было в деле.</p>
+          <div class="compare-list">
+            ${c.lawyerExercise.questions.map((item, i) => `
+              <div class="compare-item">
+                <p class="compare-q">${i + 1}. ${esc(item.q)}</p>
+                <div class="compare-cols">
+                  <div><span class="compare-label">Ты написал</span><p class="compare-mine" data-q-mine="${i}">— нет ответа —</p></div>
+                  <div><span class="compare-label">${esc(item.compareLabel)}</span><p>${esc(resolveCompare(c, item.compareValue))}</p></div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="block">
+          <span class="tag tag-court">📌 позиция суда</span>
           <h2>🏛 Что решили суды по инстанциям</h2>
           <dl class="instances">
             <dt>Первая инстанция</dt><dd>${esc(c.instances.firstInstance)}</dd>
@@ -238,6 +270,7 @@ for (const c of published) {
         </div>
 
         <div class="block">
+          <span class="tag tag-court">📌 факты дела</span>
           <h2>🔬 Доказательства</h2>
           <p><b>Представлены истцом:</b> ${esc(c.evidence.plaintiff)}</p>
           <p><b>Приняты и оценены судом:</b> ${esc(c.evidence.acceptedByCourt)}</p>
@@ -245,6 +278,7 @@ for (const c of published) {
         </div>
 
         <div class="block">
+          <span class="tag tag-court">📌 позиция суда</span>
           <h2>💡 Почему</h2>
           <p>${esc(c.rationale)}</p>
         </div>
@@ -265,7 +299,7 @@ for (const c of published) {
                   <dt>Почему появилась в этом деле</dt><dd>${esc(n.whyInCase)}</dd>
                   <dt>Как её поняла апелляция</dt><dd>${esc(n.howAppealRead)}</dd>
                   <dt>Как применил Верховный Суд</dt><dd>${esc(n.howSupremeCourt)}</dd>
-                  <dt>Практический урок</dt><dd>${esc(n.lesson)}</dd>
+                  <dt>Практический урок <span class="tag tag-analysis">✏️ анализ редакции</span></dt><dd>${esc(n.lesson)}</dd>
                 </dl>
               </div>
             `).join("")}
@@ -273,6 +307,7 @@ for (const c of published) {
         </div>
 
         <div class="block">
+          <span class="tag tag-analysis">✏️ анализ редакции — гипотеза, не факт дела</span>
           <h2>⚔️ А если бы...</h2>
           <p class="page-note">Гипотетические сценарии — учебное рассуждение по тем же нормам права, не установленные факты этого дела.</p>
           <div class="whatif-list">
@@ -281,6 +316,7 @@ for (const c of published) {
         </div>
 
         <div class="block">
+          <span class="tag tag-analysis">✏️ анализ редакции</span>
           <h2>🎓 Чему учит дело</h2>
           <ol class="lessons">${c.lessons.map((l) => `<li>${esc(l)}</li>`).join("")}</ol>
         </div>

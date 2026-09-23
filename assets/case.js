@@ -1,11 +1,32 @@
 (function () {
   "use strict";
 
+  var form = document.querySelector(".lawyer-exercise");
+  var caseSlug = form ? form.getAttribute("data-case") || "case" : "case";
+  var storageKey = "kp-lawyer-" + caseSlug;
+
+  function readSaved() {
+    try {
+      return JSON.parse(localStorage.getItem(storageKey) || "{}");
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function fillCompareBlock() {
+    var saved = readSaved();
+    document.querySelectorAll("[data-q-mine]").forEach(function (el) {
+      var v = saved[el.getAttribute("data-q-mine")];
+      el.textContent = v && v.trim() ? v : "— нет ответа —";
+    });
+  }
+
   // Тумблер "Показать решение суда"
   var btn = document.querySelector("[data-reveal-btn]");
   var zone = document.querySelector("[data-reveal-zone]");
   if (btn && zone) {
     btn.addEventListener("click", function () {
+      fillCompareBlock();
       zone.hidden = false;
       btn.textContent = "✅ Решение показано ниже";
       btn.disabled = true;
@@ -14,14 +35,11 @@
   }
 
   // Черновик ответов "Ты — адвокат" — сохраняется только в этом браузере
-  var form = document.querySelector(".lawyer-exercise");
   if (form) {
-    var caseSlug = form.getAttribute("data-case") || "case";
-    var storageKey = "kp-lawyer-" + caseSlug;
     var textareas = form.querySelectorAll("textarea[data-q]");
 
     try {
-      var saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      var saved = readSaved();
       textareas.forEach(function (t) {
         var v = saved[t.getAttribute("data-q")];
         if (v) t.value = v;

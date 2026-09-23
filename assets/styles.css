@@ -154,6 +154,19 @@ main { max-width: 780px; margin: 0 auto; padding: 28px 16px 56px; }
 .reveal-gate { text-align: center; margin: 36px 0; padding: 22px; border: 1px dashed var(--line); border-radius: var(--radius); }
 .reveal-gate .page-note { margin-top: 10px; }
 
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
+.tag-court { background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); color: var(--accent); }
+.tag-analysis { background: var(--surface-2); color: var(--ink-soft); text-transform: none; letter-spacing: 0; font-weight: 600; }
+dt .tag-analysis { margin-left: 8px; vertical-align: middle; }
+
+.compare-list { display: grid; gap: 14px; }
+.compare-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.compare-q { font-weight: 600; margin: 0 0 10px; }
+.compare-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .compare-cols { grid-template-columns: 1fr; } }
+.compare-label { display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-soft); margin-bottom: 4px; }
+.compare-mine { font-style: italic; color: var(--ink-soft); }
+
 .whatif-list { display: grid; gap: 8px; }
 .whatif { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; }
 .whatif summary { cursor: pointer; font-weight: 600; }
